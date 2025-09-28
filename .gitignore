@@ -1,15 +1,22 @@
-# terraform
+# Terraform
 .terraform/
-terraform.tfstate*
+terraform.tfstate
+terraform.tfstate.*
 crash.log
 *.tfplan
 
-# node
+# Node / Frontend
 node_modules/
 frontend/dist/
 
-# python / lambdas
+# Python / Lambdas
 __pycache__/
+*.pyc
 vendor/
 build/
 infra/modules/lambda_function/artifacts/*.zip
+
+# VS Code
+.vscode/
+.history/
+.DS_Store

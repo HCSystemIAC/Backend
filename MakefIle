@@ -1,0 +1,17 @@
+ENV=dev
+REGION=us-east-1
+
+bootstrap:
+	cd infra/bootstrap && terraform init && terraform apply -auto-approve \
+	 -var="region=$(REGION)" \
+	 -var="tfstate_bucket=hc-tfstate-<acct>-$(REGION)" \
+	 -var="tf_lock_table=hc-tf-locks"
+
+plan:
+	cd infra/envs/$(ENV) && terraform init && terraform fmt -check && terraform plan -out tfplan
+
+apply:
+	cd infra/envs/$(ENV) && terraform apply -auto-approve tfplan || terraform apply -auto-approve
+
+destroy:
+	cd infra/envs/$(ENV) && terraform destroy -auto-approve
