@@ -1,0 +1,15 @@
+# terraform
+.terraform/
+terraform.tfstate*
+crash.log
+*.tfplan
+
+# node
+node_modules/
+frontend/dist/
+
+# python / lambdas
+__pycache__/
+vendor/
+build/
+infra/modules/lambda_function/artifacts/*.zip
