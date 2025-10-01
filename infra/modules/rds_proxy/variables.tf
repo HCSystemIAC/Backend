@@ -1,0 +1,9 @@
+variable "name_prefix"     { type = string }
+variable "vpc_id"          { type = string }
+variable "subnet_ids"      { type = list(string) }
+variable "sg_lambda_id"    { type = string }
+variable "sg_rds_proxy_id" { type = string }
+variable "sg_db_id"        { type = string }
+variable "db_cluster_arn"  { type = string }
+variable "db_secret_arn"   { type = string }
+variable "tags"            { type = map(string) }
