@@ -3,7 +3,7 @@
 # Orden: networking → kms → rds_aurora → rds_proxy
 #        → s3_frontend → cloudfront_spa → s3_adjuntos
 #        → cognito → lambda_function → apigw
-#        → observabilidad → cloudtrail
+#        → observability → cloudtrail
 ###########################################################
 
 locals {
@@ -30,10 +30,6 @@ module "networking" {
   azs                  = var.azs
   private_subnet_cidrs = var.private_subnet_cidrs
 
-  # El módulo debe crear SGs:
-  # - sg_lambda: sin ingress; egress 5432 -> sg_rds_proxy
-  # - sg_db: ingress 5432 <- sg_rds_proxy
-  # - sg_rds_proxy: ingress 5432 <- sg_lambda; egress 5432 -> sg_db
   tags = local.tags
 }
 
@@ -77,16 +73,12 @@ module "rds_aurora" {
 module "rds_proxy" {
   source = "../../modules/rds_proxy"
 
-  name_prefix = var.proxy_name
-  vpc_id      = module.networking.vpc_id
-  subnet_ids  = module.networking.private_subnet_ids
-
-  sg_lambda_id    = module.networking.sg_lambda_id
+  name_prefix     = local.name_prefix
+  subnet_ids      = module.networking.private_subnet_ids
   sg_rds_proxy_id = module.networking.sg_rds_proxy_id
-  sg_db_id        = module.networking.sg_db_id
 
-  db_cluster_arn = module.rds_aurora.db_cluster_arn
-  db_secret_arn  = module.rds_aurora.master_secret_arn
+  db_cluster_id = module.rds_aurora.db_cluster_id
+  db_secret_arn = module.rds_aurora.db_master_secret_arn
 
   tags = local.tags
 }
@@ -188,15 +180,14 @@ module "apigw" {
 ############################
 # 11) Observabilidad (CloudWatch Alarms + SNS)
 ############################
-module "observabilidad" {
+module "observability" {
   source = "../../modules/observability"
 
   name_prefix = local.name_prefix
   alarm_email = var.alarm_email
 
-  apigw_rest_api_id = module.apigw.rest_api_id
-  apigw_stage_name  = var.apigw_stage_name
-
+  apigw_rest_api_id     = module.apigw.rest_api_id
+  apigw_stage_name      = var.apigw_stage_name
   lambda_function_names = module.lambda_function.lambda_names
   db_cluster_arn        = module.rds_aurora.db_cluster_arn
 

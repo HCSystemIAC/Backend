@@ -20,7 +20,7 @@ kms_alias_lambda_env = "alias/hc-lambda-env"
 # ===== Aurora PostgreSQL Serverless v2 =====
 db_engine_version        = "15.5"
 db_username              = "hc_admin"
-db_password              = "ChangeMe-Strong123!" # ⚠️ sólo dev; en prod usa Secrets Manager
+db_password              = "ChangeMe-Strong123!" # ⚠️ solo dev
 db_min_capacity          = 0.5
 db_max_capacity          = 2.0
 db_backup_retention_days = 7
@@ -29,7 +29,7 @@ db_backup_retention_days = 7
 proxy_name = "hc-rds-proxy"
 
 # ===== Buckets =====
-# Usa nombres únicos (incluí tu cuenta 116981769615)
+# Usa nombres únicos (incluye tu cuenta)
 s3_frontend_bucket = "hc-frontend-dev-116981769615"
 s3_adjuntos_bucket = "hc-adjuntos-dev-116981769615"
 
@@ -41,11 +41,10 @@ spa_index_document = "index.html"
 spa_error_document = "index.html"
 
 # ===== Cognito =====
-# Prefijo de dominio debe ser único en la región
 cognito_domain_prefix       = "hc-dev-116981769615"
-cognito_oauth_callback_urls = ["https://example.com/callback"] # ajusta cuando tengas dominio
+cognito_oauth_callback_urls = ["https://example.com/callback"]
 cognito_oauth_logout_urls   = ["https://example.com/logout"]
-cognito_allowed_origins     = ["*"] # ⚠️ sólo dev; restringe en prod
+cognito_allowed_origins     = ["*"] # ⚠️ solo dev
 
 # ===== API Gateway =====
 apigw_stage_name  = "v1"

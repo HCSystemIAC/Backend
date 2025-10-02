@@ -1,2 +1,3 @@
-output "proxy_endpoint"   { value = "" }
-output "sg_rds_proxy_id"  { value = "" }
+output "proxy_endpoint" {
+  value = aws_db_proxy.this.endpoint
+}
