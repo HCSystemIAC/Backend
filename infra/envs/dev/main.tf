@@ -3,7 +3,7 @@
 # Orden: networking → kms → rds_aurora → rds_proxy
 #        → s3_frontend → cloudfront_spa → s3_adjuntos
 #        → cognito → lambda_function → apigw
-#        → observability → cloudtrail
+#        → observabilidad → cloudtrail
 ###########################################################
 
 locals {
@@ -147,8 +147,19 @@ module "lambda_function" {
   sg_lambda_id = module.networking.sg_lambda_id
   kms_env_arn  = module.kms.kms_lambda_env_arn
 
-  rds_proxy_endpoint = module.rds_proxy.proxy_endpoint
+  # Si el proxy no está aplicado aún, usa cadena vacía para no bloquear el target del módulo.
+  rds_proxy_endpoint = try(module.rds_proxy.proxy_endpoint, "")
   s3_adjuntos_bucket = module.s3_adjuntos.bucket_name
+
+  # Rutas del código backend (desde infra/envs/dev)
+  src_pacientes = "${path.root}/../../../backend/pacientes"
+  src_historias = "${path.root}/../../../backend/historias"
+  src_episodios = "${path.root}/../../../backend/episodios"
+  src_adjuntos  = "${path.root}/../../../backend/adjuntos"
+  src_auditoria = "${path.root}/../../../backend/auditoria"
+
+  # Opcional: hereda el stage del ambiente
+  stage = var.env
 
   tags = local.tags
 }
