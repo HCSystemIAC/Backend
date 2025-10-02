@@ -1,0 +1,6 @@
+{
+  "resource": "/pacientes",
+  "path": "/pacientes",
+  "httpMethod": "POST",
+  "body": "{\"nombre\":\"Ana Pérez\",\"documento\":\"DNI-123\"}"
+}

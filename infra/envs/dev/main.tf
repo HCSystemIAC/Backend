@@ -3,7 +3,7 @@
 # Orden: networking → kms → rds_aurora → rds_proxy
 #        → s3_frontend → cloudfront_spa → s3_adjuntos
 #        → cognito → lambda_function → apigw
-#        → observability → cloudtrail
+#        → observabilidad → cloudtrail
 ###########################################################
 
 locals {
@@ -147,12 +147,28 @@ module "lambda_function" {
   sg_lambda_id = module.networking.sg_lambda_id
   kms_env_arn  = module.kms.kms_lambda_env_arn
 
-  rds_proxy_endpoint = module.rds_proxy.proxy_endpoint
+  # Si el proxy aún no está aplicado, pasa cadena vacía.
+  rds_proxy_endpoint = try(module.rds_proxy.proxy_endpoint, "")
   s3_adjuntos_bucket = module.s3_adjuntos.bucket_name
+
+  # Rutas del código backend (usa paths absolutos para evitar warnings del editor)
+  src_pacientes = abspath("${path.root}/../../../backend/pacientes")
+  src_historias = abspath("${path.root}/../../../backend/historias")
+  src_episodios = abspath("${path.root}/../../../backend/episodios")
+  src_adjuntos  = abspath("${path.root}/../../../backend/adjuntos")
+  src_auditoria = abspath("${path.root}/../../../backend/auditoria")
+
+  # Parámetros de ejecución (explícitos para acallar el linter)
+  runtime         = "python3.12"
+  handler         = "app.handler"
+  timeout_seconds = 10
+  memory_mb       = 256
+
+  # Hereda el stage del ambiente
+  stage = var.env
 
   tags = local.tags
 }
-
 ############################
 # 10) API Gateway (Regional) + Authorizer Cognito
 ############################

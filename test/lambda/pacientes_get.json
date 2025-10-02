@@ -1,0 +1,6 @@
+{
+  "resource": "/pacientes",
+  "path": "/pacientes",
+  "httpMethod": "GET",
+  "queryStringParameters": { "limit": "3" }
+}

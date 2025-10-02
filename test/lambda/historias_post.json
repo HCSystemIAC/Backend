@@ -1,0 +1,6 @@
+{
+  "resource": "/historias",
+  "path": "/historias",
+  "httpMethod": "POST",
+  "body": "{\"paciente_id\":\"123\",\"titulo\":\"Consulta de control\"}"
+}

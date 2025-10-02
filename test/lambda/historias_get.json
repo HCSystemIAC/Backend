@@ -1,0 +1,6 @@
+{
+  "resource": "/historias",
+  "path": "/historias",
+  "httpMethod": "GET",
+  "queryStringParameters": { "paciente_id": "123" }
+}
