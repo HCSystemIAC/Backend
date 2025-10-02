@@ -71,7 +71,6 @@ data "aws_iam_policy_document" "inline" {
     resources = ["*"]
   }
 
-  # (Opcional, no hace daño) lectura del Secret de BD si luego lo usas
   statement {
     sid     = "SecretsRead"
     effect  = "Allow"

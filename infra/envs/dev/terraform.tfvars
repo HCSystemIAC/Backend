@@ -20,7 +20,7 @@ kms_alias_lambda_env = "alias/hc-lambda-env"
 # ===== Aurora PostgreSQL Serverless v2 =====
 db_engine_version        = "15.5"
 db_username              = "hc_admin"
-db_password              = "ChangeMe-Strong123!" # ⚠️ solo dev
+db_password              = "ChangeMe-Strong123!"
 db_min_capacity          = 0.5
 db_max_capacity          = 2.0
 db_backup_retention_days = 7
@@ -44,7 +44,7 @@ spa_error_document = "index.html"
 cognito_domain_prefix       = "hc-dev-116981769615"
 cognito_oauth_callback_urls = ["https://example.com/callback"]
 cognito_oauth_logout_urls   = ["https://example.com/logout"]
-cognito_allowed_origins     = ["*"] # ⚠️ solo dev
+cognito_allowed_origins     = ["*"]
 
 # ===== API Gateway =====
 apigw_stage_name  = "v1"
