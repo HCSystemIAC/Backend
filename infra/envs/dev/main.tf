@@ -220,13 +220,3 @@ module "cloudtrail" {
   s3_data_events_bucket_arn = module.s3_adjuntos.bucket_arn
   tags                      = local.tags
 }
-
-############################
-# Outputs útiles
-############################
-output "frontend_bucket" { value = module.s3_frontend.bucket_name }
-output "cloudfront_domain" { value = module.cloudfront_spa.domain_name }
-output "apigw_invoke_url" { value = module.apigw.invoke_url }
-output "cognito_user_pool_id" { value = module.cognito.user_pool_id }
-output "cognito_app_client_id" { value = module.cognito.app_client_id }
-output "cognito_hosted_ui_domain" { value = module.cognito.hosted_ui_domain }
