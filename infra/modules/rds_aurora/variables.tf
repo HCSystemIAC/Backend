@@ -1,3 +1,4 @@
+# infra/modules/rds_aurora/variables.tf
 variable "name_prefix" {
   type = string
 }

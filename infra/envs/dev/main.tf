@@ -1,9 +1,10 @@
+# infra/envs/dev/main.tf
 ###########################################################
 # main.tf — Orquestación del entorno dev
 # Orden: networking → kms → rds_aurora → rds_proxy
 #        → s3_frontend → cloudfront_spa → s3_adjuntos
 #        → cognito → lambda_function → apigw
-#        → observabilidad → cloudtrail
+#        → observabilidad → cloudtrail → jenkins_ec2
 ###########################################################
 
 locals {
@@ -58,6 +59,7 @@ module "rds_aurora" {
   min_capacity          = var.db_min_capacity
   max_capacity          = var.db_max_capacity
   backup_retention_days = var.db_backup_retention_days
+  skip_final_snapshot   = var.skip_final_snapshot   # 👈 cableado desde root
 
   vpc_id      = module.networking.vpc_id
   subnet_ids  = module.networking.private_subnet_ids
@@ -169,6 +171,7 @@ module "lambda_function" {
 
   tags = local.tags
 }
+
 ############################
 # 10) API Gateway (Regional) + Authorizer Cognito
 ############################
@@ -219,4 +222,19 @@ module "cloudtrail" {
   name_prefix               = local.name_prefix
   s3_data_events_bucket_arn = module.s3_adjuntos.bucket_arn
   tags                      = local.tags
+}
+
+############################
+# 13) Jenkins EC2 (para pipeline de IaC)
+############################
+module "jenkins_ec2" {
+  source = "../../modules/jenkins-ec2"
+
+  name_prefix        = local.name_prefix
+  instance_type      = var.jenkins_instance_type
+  key_pair_name      = var.jenkins_key_pair_name
+  allowed_ssh_cidrs  = var.jenkins_allowed_ssh_cidrs
+  allowed_http_cidrs = var.jenkins_allowed_http_cidrs
+
+  tags = local.tags
 }

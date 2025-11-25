@@ -1,3 +1,4 @@
+# infra/modules/rds_aurora/main.tf
 locals {
   tags      = merge(var.tags, { Component = "rds-aurora" })
   id_prefix = lower(var.name_prefix)  # usar SIEMPRE para identifiers de RDS
@@ -13,9 +14,13 @@ resource "aws_db_subnet_group" "this" {
 # Secret con credenciales del master (fuente única para Proxy)
 # (el nombre del secret puede llevar mayúsculas sin problema)
 resource "aws_secretsmanager_secret" "db_master" {
-  name                          = "${var.name_prefix}-db-master"
-  description                   = "Master credentials for Aurora cluster (used by RDS Proxy)"
-  kms_key_id                    = var.kms_key_arn
+  name        = "${var.name_prefix}-db-master"
+  description = "Master credentials for Aurora cluster (used by RDS Proxy)"
+  kms_key_id  = var.kms_key_arn
+
+  # 👇 clave para que en dev se destruya sin quedar "scheduled for deletion"
+  recovery_window_in_days = 0
+
   tags = merge(local.tags, { Name = "${var.name_prefix}-db-master" })
 }
 
