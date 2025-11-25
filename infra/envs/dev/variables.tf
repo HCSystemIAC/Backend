@@ -1,3 +1,4 @@
+# infra/envs/dev/variables.tf
 #################################
 # Variables — entorno dev
 #################################
@@ -98,6 +99,12 @@ variable "db_backup_retention_days" {
   type        = number
 }
 
+variable "skip_final_snapshot" {
+  description = "Si es true, no crea snapshot final al destruir (útil en dev)"
+  type        = bool
+  default     = true
+}
+
 # ===== RDS Proxy =====
 variable "proxy_name" {
   description = "Nombre lógico del RDS Proxy"
@@ -182,4 +189,25 @@ variable "apigw_rate_limit" {
 variable "alarm_email" {
   description = "Correo de suscripción para SNS (alarmas)"
   type        = string
+}
+
+# ===== Jenkins EC2 =====
+variable "jenkins_instance_type" {
+  description = "Tipo de instancia EC2 para Jenkins"
+  type        = string
+}
+
+variable "jenkins_key_pair_name" {
+  description = "Nombre del key pair EXISTENTE para SSH a Jenkins"
+  type        = string
+}
+
+variable "jenkins_allowed_ssh_cidrs" {
+  description = "CIDRs que pueden hacer SSH (22) a Jenkins"
+  type        = list(string)
+}
+
+variable "jenkins_allowed_http_cidrs" {
+  description = "CIDRs que pueden acceder a la UI de Jenkins (8080)"
+  type        = list(string)
 }

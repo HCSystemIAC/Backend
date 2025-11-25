@@ -1,3 +1,4 @@
+# infra/envs/dev/terraform.tfvars
 # ===== Core =====
 region  = "us-east-1"
 project = "HC"
@@ -24,12 +25,12 @@ db_password              = "ChangeMe-Strong123!"
 db_min_capacity          = 0.5
 db_max_capacity          = 2.0
 db_backup_retention_days = 7
+skip_final_snapshot      = true
 
 # ===== RDS Proxy =====
 proxy_name = "hc-rds-proxy"
 
 # ===== Buckets =====
-# Usa nombres únicos (incluye tu cuenta)
 s3_frontend_bucket = "hc-frontend-dev-116981769615"
 s3_adjuntos_bucket = "hc-adjuntos-dev-116981769615"
 
@@ -53,3 +54,9 @@ apigw_rate_limit  = 50
 
 # ===== Observabilidad =====
 alarm_email = "melissayengle@gmail.com"
+
+# ===== Jenkins EC2 =====
+jenkins_instance_type      = "t3.small"
+jenkins_key_pair_name = "hc-dev-jenkins-key"
+jenkins_allowed_ssh_cidrs  = ["0.0.0.0/0"]
+jenkins_allowed_http_cidrs = ["0.0.0.0/0"]

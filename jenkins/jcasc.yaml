@@ -1,0 +1,32 @@
+jenkins:
+  systemMessage: >
+    Jenkins de IAC-ISSA (entorno ${ENVIRONMENT:-dev}).
+    Configurado vía Jenkins Configuration as Code (jcasc.yaml en GitHub).
+
+  numExecutors: 2
+  mode: NORMAL
+  labelString: "master terraform"
+
+  # -------------------------
+  # Agente SSH "terraform"
+  # -------------------------
+  nodes:
+    - permanent:
+        name: "terraform-agent"
+        nodeDescription: "Agente SSH Terraform en la misma EC2"
+        remoteFS: "/home/ec2-user"
+        numExecutors: 1
+        labelString: "terraform"
+        retentionStrategy:
+          always: {}
+        launcher:
+          ssh:
+            host: "localhost"
+            port: 22
+            credentialsId: "ssh-jenkins-ec2"
+            sshHostKeyVerificationStrategy:
+              nonVerifyingKeyVerificationStrategy: {}
+
+unclassified:
+  location:
+    url: "${JENKINS_URL:-http://34.225.24.150:8080/}"

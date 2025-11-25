@@ -1,3 +1,4 @@
+# infra/envs/dev/providers.tf
 terraform {
   backend "s3" {
     bucket       = "hc-tfstate-116981769615-us-east-1"
@@ -5,11 +6,9 @@ terraform {
     region       = "us-east-1"
     encrypt      = true
     use_lockfile = true
-    profile      = "hc-dev"
   }
 }
 
 provider "aws" {
-  region  = var.region
-  profile = "hc-dev"
+  region = var.region
 }

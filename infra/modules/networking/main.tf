@@ -1,3 +1,4 @@
+# infra/modules/networking/main.tf
 locals {
   tags = merge(var.tags, {
     Component = "networking"

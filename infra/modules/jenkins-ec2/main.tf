@@ -1,0 +1,187 @@
+locals {
+  tags = merge(var.tags, {
+    Component = "jenkins-ec2"
+  })
+}
+
+# =============================
+# Red: VPC por defecto de AWS
+# =============================
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+# Tomamos la primera subnet de la VPC por defecto
+locals {
+  subnet_id = element(data.aws_subnets.default.ids, 0)
+}
+
+# =============================
+# AMI Amazon Linux 2 (x86_64)
+# =============================
+data "aws_ami" "amazon_linux2" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
+# =============================
+# Security Group para Jenkins
+# =============================
+resource "aws_security_group" "jenkins" {
+  name        = "${var.name_prefix}-jenkins-sg"
+  description = "Security group para Jenkins EC2"
+  vpc_id      = data.aws_vpc.default.id
+
+  # SSH
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = var.allowed_ssh_cidrs
+  }
+
+  # Jenkins UI (8080)
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = var.allowed_http_cidrs
+  }
+
+  # Salida libre a Internet
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(local.tags, {
+    Name = "${var.name_prefix}-jenkins-sg"
+  })
+}
+
+# =============================
+# Elastic IP para Jenkins
+# =============================
+resource "aws_eip" "jenkins" {
+  domain = "vpc"
+
+  tags = merge(local.tags, {
+    Name = "${var.name_prefix}-jenkins-eip"
+  })
+}
+
+# =============================
+# Instancia EC2 de Jenkins
+# =============================
+resource "aws_instance" "jenkins" {
+  ami                         = data.aws_ami.amazon_linux2.id
+  instance_type               = var.instance_type
+  subnet_id                   = local.subnet_id
+  vpc_security_group_ids      = [aws_security_group.jenkins.id]
+  associate_public_ip_address = true
+  key_name                    = var.key_pair_name
+
+  # Script de instalación de Jenkins (con Java 17, AWS CLI y Checkov)
+  user_data = <<-EOF
+    #!/bin/bash
+    set -xe
+
+    # -----------------------
+    # Actualizar paquetes base
+    # -----------------------
+    yum update -y
+
+    # -----------------------
+    # AWS CLI (para hablar con AWS)
+    # -----------------------
+    yum install -y awscli
+
+    # -----------------------
+    # Terraform (para pipelines de IaC)
+    # -----------------------
+    yum install -y yum-utils
+
+    yum-config-manager --add-repo \
+      https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+
+    yum install -y terraform
+
+    # Log de versión para depuración
+    terraform -version || true
+
+    # -----------------------
+    # Python 3.8 + pip (para Checkov)
+    # Amazon Linux 2 usa amazon-linux-extras para python3.8
+    # -----------------------
+    if ! command -v python3.8 >/dev/null 2>&1; then
+      amazon-linux-extras enable python3.8
+      yum clean metadata
+      yum install -y python3.8
+    fi
+
+    # Asegurar pip para python3.8
+    python3.8 -m ensurepip --upgrade || true
+    python3.8 -m pip install --upgrade pip
+
+    # -----------------------
+    # Instalar Checkov
+    # Fijamos versión <3.0.0 para evitar problemas con dependencias nuevas
+    # -----------------------
+    python3.8 -m pip install "checkov<3.0.0"
+
+    # Poner checkov en el PATH global si no está
+    if ! command -v checkov >/dev/null 2>&1; then
+      CHECKOV_BIN="$(python3.8 -m site --user-base)/bin/checkov"
+      if [ -f "$CHECKOV_BIN" ] && [ ! -f /usr/local/bin/checkov ]; then
+        ln -s "$CHECKOV_BIN" /usr/local/bin/checkov
+      fi
+    fi
+
+    # -----------------------
+    # Java 17 (requerido por Jenkins moderno)
+    # -----------------------
+    yum install -y java-17-amazon-corretto-headless
+
+    # -----------------------
+    # Repositorio de Jenkins
+    # -----------------------
+    wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+    rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+    # -----------------------
+    # Jenkins + Git
+    # -----------------------
+    yum install -y jenkins git
+
+    # -----------------------
+    # Habilitar y arrancar Jenkins
+    # -----------------------
+    systemctl daemon-reload
+    systemctl enable jenkins
+    systemctl start jenkins
+  EOF
+
+  tags = merge(local.tags, {
+    Name = "${var.name_prefix}-jenkins"
+  })
+}
+
+# Asociar el Elastic IP a la instancia
+resource "aws_eip_association" "jenkins" {
+  allocation_id = aws_eip.jenkins.id
+  instance_id   = aws_instance.jenkins.id
+}

@@ -1,3 +1,4 @@
+# infra/modules/networking/variables.tf
 variable "name_prefix" {
   description = "Prefijo común (p.ej. HC-dev)"
   type        = string
