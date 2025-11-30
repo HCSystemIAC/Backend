@@ -1,2 +1,9 @@
-output "bucket_name" { value = var.bucket_name }
-output "bucket_arn"  { value = "" }
+output "bucket_name" {
+  description = "Nombre del bucket S3 del frontend"
+  value       = aws_s3_bucket.this.bucket
+}
+
+output "bucket_arn" {
+  description = "ARN del bucket S3 del frontend"
+  value       = aws_s3_bucket.this.arn
+}
