@@ -1,3 +1,4 @@
+# infra/modules/lambda_function/outputs.tf
 output "lambda_pacientes_arn" {
   value = aws_lambda_function.fn["pacientes"].arn
 }

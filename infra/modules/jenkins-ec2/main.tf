@@ -1,3 +1,4 @@
+# infra/modules/jenkins-ec2/main.tf
 locals {
   tags = merge(var.tags, {
     Component = "jenkins-ec2"

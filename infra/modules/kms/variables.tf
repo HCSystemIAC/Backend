@@ -1,3 +1,4 @@
+# infra/modules/kms/variables.tf
 variable "alias_db" {
   description = "Alias para la CMK de base de datos (ej. alias/hc-db)"
   type        = string

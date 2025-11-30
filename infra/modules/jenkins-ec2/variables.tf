@@ -1,3 +1,4 @@
+# infra/modules/jenkins-ec2/variables.tf
 variable "name_prefix" {
   description = "Prefijo lógico del entorno, ej: HC-dev"
   type        = string

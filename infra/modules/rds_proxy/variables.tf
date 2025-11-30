@@ -1,3 +1,4 @@
+# infra/modules/rds_proxy/variables.tf
 variable "name_prefix"     { type = string }
 variable "subnet_ids"      { type = list(string) }
 variable "sg_rds_proxy_id" { type = string }

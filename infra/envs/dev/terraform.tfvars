@@ -27,9 +27,6 @@ db_max_capacity          = 2.0
 db_backup_retention_days = 7
 skip_final_snapshot      = true
 
-# ===== RDS Proxy =====
-proxy_name = "hc-rds-proxy"
-
 # ===== Buckets =====
 s3_frontend_bucket = "hc-frontend-dev-116981769615"
 s3_adjuntos_bucket = "hc-adjuntos-dev-116981769615"

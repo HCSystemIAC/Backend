@@ -8,8 +8,9 @@ pipeline {
     }
 
     environment {
-        AWS_REGION       = 'us-east-1'
-        TF_IN_AUTOMATION = 'true'
+        AWS_REGION         = 'us-east-1'
+        AWS_DEFAULT_REGION = 'us-east-1'
+        TF_IN_AUTOMATION   = 'true'
     }
 
     stages {
@@ -59,8 +60,8 @@ pipeline {
             }
         }
 
-        // Más adelante, cuando quieras el apply manual:
-        // stage('Terraform Apply (manual)') {
+        // Dejar esto comentado por ahora; lo activamos al final del proyecto
+        // stage('Terraform Apply (dev)') {
         //     when {
         //         beforeAgent true
         //         expression { return env.BRANCH_NAME == 'develop' }
