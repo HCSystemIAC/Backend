@@ -10,5 +10,5 @@ output "app_client_id" {
 
 output "hosted_ui_domain" {
   description = "Dominio completo del Hosted UI de Cognito"
-  value       = "https://${aws_cognito_user_pool_domain.this.domain}.auth.${data.aws_region.current.name}.amazoncognito.com"
+  value       = "https://${aws_cognito_user_pool_domain.this.domain}.auth.${data.aws_region.current.id}.amazoncognito.com"
 }
