@@ -1,3 +1,4 @@
+# infra/modules/kms/outputs.tf
 output "kms_db_arn" {
   description = "ARN de la CMK para Aurora"
   value       = aws_kms_key.db.arn

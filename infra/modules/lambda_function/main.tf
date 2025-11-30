@@ -1,3 +1,4 @@
+# infra/modules/lambda_function/main.tf
 ########################################
 # Módulo: lambda_function
 ########################################

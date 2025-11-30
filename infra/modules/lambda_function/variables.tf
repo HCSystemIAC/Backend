@@ -1,3 +1,4 @@
+# infra/modules/lambda_function/variables.tf
 # ====== Inputs core del módulo ======
 
 variable "name_prefix"     { type = string }

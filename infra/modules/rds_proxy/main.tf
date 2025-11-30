@@ -1,3 +1,4 @@
+# infra/modules/rds_proxy/main.tf
 locals {
   tags      = merge(var.tags, { Component = "rds-proxy" })
   id_prefix = lower(var.name_prefix) # para names/identifiers con restricciones
