@@ -1,11 +1,10 @@
-# infra/modules/lambda_function/main.tf
 ########################################
 # Módulo: lambda_function
 ########################################
 
 locals {
-  tags       = merge(var.tags, { Component = "lambda" })
-  name_base  = lower(var.name_prefix)
+  tags      = merge(var.tags, { Component = "lambda" })
+  name_base = lower(var.name_prefix)
 
   functions = {
     pacientes = {
@@ -37,7 +36,7 @@ locals {
 
 data "aws_iam_policy_document" "assume" {
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = ["sts:AssumeRole"]
     principals {
       type        = "Service"
@@ -52,15 +51,21 @@ resource "aws_iam_role" "lambda_role" {
   tags               = merge(local.tags, { Name = "${var.name_prefix}-lambda-role" })
 }
 
-# Logs + VPC ENI
+# Logs + VPC ENI + Secrets + S3 Adjuntos
 data "aws_iam_policy_document" "inline" {
+  # Logs
   statement {
     sid     = "Logs"
     effect  = "Allow"
-    actions = ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
     resources = ["*"]
   }
 
+  # ENIs para VPC
   statement {
     sid     = "VpcNetworking"
     effect  = "Allow"
@@ -72,11 +77,31 @@ data "aws_iam_policy_document" "inline" {
     resources = ["*"]
   }
 
+  # Secrets de credenciales DB (si se usan más adelante)
   statement {
     sid     = "SecretsRead"
     effect  = "Allow"
-    actions = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
+    actions = [
+      "secretsmanager:GetSecretValue",
+      "secretsmanager:DescribeSecret"
+    ]
     resources = ["*"]
+  }
+
+  # Acceso al bucket de adjuntos (S3)
+  statement {
+    sid    = "S3AdjuntosAccess"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:ListBucket"
+    ]
+    resources = [
+      "arn:aws:s3:::${var.s3_adjuntos_bucket}",
+      "arn:aws:s3:::${var.s3_adjuntos_bucket}/*"
+    ]
   }
 }
 
@@ -90,7 +115,6 @@ resource "aws_iam_role_policy" "inline" {
 # Empaquetado por función
 ############################
 
-# Genera un .zip por cada función desde su carpeta src_dir
 data "archive_file" "zip" {
   for_each    = local.functions
   type        = "zip"
@@ -130,10 +154,11 @@ resource "aws_lambda_function" "fn" {
   environment {
     variables = merge(
       {
-        STAGE               = var.stage
-        SERVICE             = "hc"
-        RDS_PROXY_ENDPOINT  = var.rds_proxy_endpoint
-        S3_ADJUNTOS_BUCKET  = var.s3_adjuntos_bucket
+        STAGE              = var.stage
+        SERVICE            = "hc"
+        RDS_PROXY_ENDPOINT = var.rds_proxy_endpoint
+        S3_ADJUNTOS_BUCKET = var.s3_adjuntos_bucket
+        DB_NAME            = "hcdb"   # nombre de BD usado en Aurora
       },
       var.extra_env
     )
@@ -146,5 +171,8 @@ resource "aws_lambda_function" "fn" {
 
   tags = merge(local.tags, { Name = each.value.name })
 
-  depends_on = [aws_iam_role_policy.inline, aws_cloudwatch_log_group.lg]
+  depends_on = [
+    aws_iam_role_policy.inline,
+    aws_cloudwatch_log_group.lg
+  ]
 }
