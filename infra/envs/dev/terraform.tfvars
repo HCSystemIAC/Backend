@@ -39,10 +39,16 @@ spa_index_document = "index.html"
 spa_error_document = "index.html"
 
 # ===== Cognito =====
-cognito_domain_prefix       = "hc-dev-116981769615"
-cognito_oauth_callback_urls = ["https://example.com/callback"]
-cognito_oauth_logout_urls   = ["https://example.com/logout"]
-cognito_allowed_origins     = ["*"]
+cognito_domain_prefix = "hc-dev-116981769615"
+
+cognito_oauth_callback_urls = [
+  "https://d2he2muz3n6829.cloudfront.net/index.html"
+]
+cognito_oauth_logout_urls = [
+  "https://d2he2muz3n6829.cloudfront.net/index.html"
+]
+
+cognito_allowed_origins = ["*"]
 
 # ===== API Gateway =====
 apigw_stage_name  = "v1"

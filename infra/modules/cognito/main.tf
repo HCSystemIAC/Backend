@@ -1,6 +1,6 @@
 ########################################
 # Módulo: cognito
-# User Pool + App Client (PKCE) + Hosted UI + Grupos
+# User Pool + App Client (Code + Implicit) + Hosted UI + Grupos
 ########################################
 
 data "aws_region" "current" {}
@@ -42,12 +42,13 @@ resource "aws_cognito_user_pool" "this" {
 }
 
 # =============================
-# App Client (PKCE, OAuth2 Code)
+# App Client (Code + Implicit)
 # =============================
 resource "aws_cognito_user_pool_client" "this" {
   name         = "${var.name_prefix}-app-client"
   user_pool_id = aws_cognito_user_pool.this.id
 
+  # SPA: no usamos client secret
   generate_secret = false
 
   supported_identity_providers = ["COGNITO"]
@@ -55,8 +56,13 @@ resource "aws_cognito_user_pool_client" "this" {
   callback_urls = var.callback_urls
   logout_urls   = var.logout_urls
 
+  # Permitimos Code + Implicit para usar response_type=token en el frontend
   allowed_oauth_flows_user_pool_client = true
-  allowed_oauth_flows                  = ["code"]
+  allowed_oauth_flows = [
+    "code",
+    "implicit"
+  ]
+
   allowed_oauth_scopes = [
     "openid",
     "email",
@@ -73,6 +79,7 @@ resource "aws_cognito_user_pool_client" "this" {
   refresh_token_validity = 30
   access_token_validity  = 60
   id_token_validity      = 60
+
   token_validity_units {
     access_token  = "minutes"
     id_token      = "minutes"
