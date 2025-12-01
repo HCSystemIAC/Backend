@@ -1,3 +1,4 @@
+# infra/modules/jenkins-ec2/outputs.tf
 output "jenkins_public_ip" {
   description = "IP pública de la instancia Jenkins (EIP)"
   value       = aws_eip.jenkins.public_ip

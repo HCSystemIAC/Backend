@@ -104,13 +104,6 @@ variable "skip_final_snapshot" {
   type        = bool
   default     = true
 }
-
-# ===== RDS Proxy =====
-variable "proxy_name" {
-  description = "Nombre lógico del RDS Proxy"
-  type        = string
-}
-
 # ===== Buckets =====
 variable "s3_frontend_bucket" {
   description = "Nombre del bucket S3 para la SPA (privado, usado por CloudFront OAC)"

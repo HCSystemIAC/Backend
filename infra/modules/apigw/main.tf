@@ -1,3 +1,4 @@
+#infra/modules/apigw/main.tf
 ########################################
 # Módulo: apigw
 # API Gateway REST Regional + Cognito + Lambdas por dominio
@@ -40,7 +41,7 @@ resource "aws_api_gateway_authorizer" "cognito" {
   rest_api_id     = aws_api_gateway_rest_api.this.id
   type            = "COGNITO_USER_POOLS"
   identity_source = "method.request.header.Authorization"
-  provider_arns   = [
+  provider_arns = [
     "arn:aws:cognito-idp:${var.region}:${data.aws_caller_identity.current.account_id}:userpool/${var.cognito_user_pool_id}"
   ]
 }
@@ -130,6 +131,11 @@ resource "aws_api_gateway_deployment" "this" {
   triggers = {
     redeploy = timestamp()
   }
+
+  # Evita el error de borrar un deployment aún referenciado por el stage
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_api_gateway_stage" "this" {
@@ -138,21 +144,4 @@ resource "aws_api_gateway_stage" "this" {
   deployment_id = aws_api_gateway_deployment.this.id
 
   tags = local.tags
-}
-
-# =============================
-# Method settings globales (throttle + logs)
-# =============================
-resource "aws_api_gateway_method_settings" "global" {
-  rest_api_id = aws_api_gateway_rest_api.this.id
-  stage_name  = aws_api_gateway_stage.this.stage_name
-  method_path = "*/*"
-
-  settings {
-    logging_level          = "ERROR"
-    data_trace_enabled     = false
-    metrics_enabled        = true
-    throttling_burst_limit = var.burst_limit
-    throttling_rate_limit  = var.rate_limit
-  }
 }

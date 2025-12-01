@@ -12,13 +12,12 @@ resource "aws_db_subnet_group" "this" {
 }
 
 # Secret con credenciales del master (fuente única para Proxy)
-# (el nombre del secret puede llevar mayúsculas sin problema)
 resource "aws_secretsmanager_secret" "db_master" {
   name        = "${var.name_prefix}-db-master"
   description = "Master credentials for Aurora cluster (used by RDS Proxy)"
   kms_key_id  = var.kms_key_arn
 
-  # 👇 clave para que en dev se destruya sin quedar "scheduled for deletion"
+  # dev: destrucción inmediata sin ventana de recuperación
   recovery_window_in_days = 0
 
   tags = merge(local.tags, { Name = "${var.name_prefix}-db-master" })
@@ -26,7 +25,7 @@ resource "aws_secretsmanager_secret" "db_master" {
 
 resource "aws_secretsmanager_secret_version" "db_master" {
   secret_id = aws_secretsmanager_secret.db_master.id
-  # No ponemos host/endpoint para evitar ciclos de dependencia
+
   secret_string = jsonencode({
     username = var.username
     password = var.password
@@ -40,7 +39,9 @@ resource "aws_secretsmanager_secret_version" "db_master" {
 resource "aws_rds_cluster" "this" {
   cluster_identifier      = "${local.id_prefix}-aurora"
   engine                  = "aurora-postgresql"
-  engine_version          = var.engine_version
+  # Dejamos que AWS elija una versión válida por defecto
+  # engine_version        = var.engine_version
+
   engine_mode             = "provisioned" # requerido para Serverless v2
   database_name           = "hcdb"
   master_username         = var.username
@@ -57,7 +58,6 @@ resource "aws_rds_cluster" "this" {
   enabled_cloudwatch_logs_exports     = ["postgresql"]
   iam_database_authentication_enabled = false
 
-  # Destruir sin snapshot final (controlado por variable; en dev = true)
   skip_final_snapshot = var.skip_final_snapshot
 
   serverlessv2_scaling_configuration {
@@ -73,8 +73,10 @@ resource "aws_rds_cluster_instance" "writer" {
   identifier         = "${local.id_prefix}-aurora-writer-1"
   cluster_identifier = aws_rds_cluster.this.id
   instance_class     = "db.serverless"
-  engine             = aws_rds_cluster.this.engine
-  engine_version     = aws_rds_cluster.this.engine_version
+
+  # Hereda engine/versión del cluster, no fijamos versión aquí
+  engine = aws_rds_cluster.this.engine
+  # engine_version = aws_rds_cluster.this.engine_version
 
   publicly_accessible          = false
   performance_insights_enabled = false

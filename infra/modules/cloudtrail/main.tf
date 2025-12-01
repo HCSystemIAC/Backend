@@ -1,3 +1,4 @@
+#infra/modules/cloudtrail/main.tf
 ########################################
 # Módulo: cloudtrail
 # Trail de cuenta + Data Events S3 (adjuntos)
@@ -7,6 +8,8 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
+  id_prefix = lower(var.name_prefix)
+
   tags = merge(var.tags, {
     Component = "cloudtrail"
   })
@@ -17,7 +20,7 @@ locals {
 ########################################
 
 resource "aws_s3_bucket" "logs" {
-  bucket = "${var.name_prefix}-cloudtrail-logs-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.id}"
+  bucket = "${local.id_prefix}-cloudtrail-logs-${data.aws_caller_identity.current.account_id}-${data.aws_region.current.id}"
 
   force_destroy = false
 
