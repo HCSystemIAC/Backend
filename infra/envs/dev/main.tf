@@ -59,7 +59,7 @@ module "rds_aurora" {
   min_capacity          = var.db_min_capacity
   max_capacity          = var.db_max_capacity
   backup_retention_days = var.db_backup_retention_days
-  skip_final_snapshot   = var.skip_final_snapshot   # 👈 cableado desde root
+  skip_final_snapshot   = var.skip_final_snapshot # 👈 cableado desde root
 
   vpc_id      = module.networking.vpc_id
   subnet_ids  = module.networking.private_subnet_ids

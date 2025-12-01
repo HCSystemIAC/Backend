@@ -19,7 +19,7 @@ kms_alias_adjuntos   = "alias/hc-adjuntos"
 kms_alias_lambda_env = "alias/hc-lambda-env"
 
 # ===== Aurora PostgreSQL Serverless v2 =====
-db_engine_version        = "15.5"
+db_engine_version        = "15.4"
 db_username              = "hc_admin"
 db_password              = "ChangeMe-Strong123!"
 db_min_capacity          = 0.5
@@ -54,6 +54,6 @@ alarm_email = "melissayengle@gmail.com"
 
 # ===== Jenkins EC2 =====
 jenkins_instance_type      = "t3.small"
-jenkins_key_pair_name = "hc-dev-jenkins-key"
+jenkins_key_pair_name      = "hc-dev-jenkins-key"
 jenkins_allowed_ssh_cidrs  = ["0.0.0.0/0"]
 jenkins_allowed_http_cidrs = ["0.0.0.0/0"]
