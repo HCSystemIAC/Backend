@@ -80,6 +80,65 @@ resource "aws_api_gateway_method" "post" {
 }
 
 # =============================
+# Método OPTIONS (CORS, sin auth)
+# =============================
+resource "aws_api_gateway_method" "options" {
+  for_each         = local.resources
+  rest_api_id      = aws_api_gateway_rest_api.this.id
+  resource_id      = aws_api_gateway_resource.resource[each.key].id
+  http_method      = "OPTIONS"
+  authorization    = "NONE"
+  api_key_required = false
+}
+
+# MOCK integration para el preflight
+resource "aws_api_gateway_integration" "options_integration" {
+  for_each    = local.resources
+  rest_api_id = aws_api_gateway_rest_api.this.id
+  resource_id = aws_api_gateway_resource.resource[each.key].id
+  http_method = aws_api_gateway_method.options[each.key].http_method
+  type        = "MOCK"
+
+  request_templates = {
+    "application/json" = "{\"statusCode\": 200}"
+  }
+}
+
+# Respuesta del método OPTIONS
+resource "aws_api_gateway_method_response" "options_response" {
+  for_each    = local.resources
+  rest_api_id = aws_api_gateway_rest_api.this.id
+  resource_id = aws_api_gateway_resource.resource[each.key].id
+  http_method = aws_api_gateway_method.options[each.key].http_method
+  status_code = "200"
+
+  response_models = {
+    "application/json" = "Empty"
+  }
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Headers" = true
+  }
+}
+
+resource "aws_api_gateway_integration_response" "options_integration_response" {
+  for_each    = local.resources
+  rest_api_id = aws_api_gateway_rest_api.this.id
+  resource_id = aws_api_gateway_resource.resource[each.key].id
+  http_method = aws_api_gateway_method.options[each.key].http_method
+  status_code = aws_api_gateway_method_response.options_response[each.key].status_code
+
+  # Para dev usamos origen "*"; incluye GET/POST/OPTIONS y cabeceras usadas por el front
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+    "method.response.header.Access-Control-Allow-Methods" = "'GET,POST,OPTIONS'"
+    "method.response.header.Access-Control-Allow-Headers" = "'Authorization,Content-Type'"
+  }
+}
+
+# =============================
 # Integraciones Lambda Proxy
 # =============================
 resource "aws_api_gateway_integration" "get_integration" {
@@ -122,7 +181,8 @@ resource "aws_lambda_permission" "api_invoke" {
 resource "aws_api_gateway_deployment" "this" {
   depends_on = [
     aws_api_gateway_integration.get_integration,
-    aws_api_gateway_integration.post_integration
+    aws_api_gateway_integration.post_integration,
+    aws_api_gateway_integration.options_integration,
   ]
 
   rest_api_id = aws_api_gateway_rest_api.this.id
