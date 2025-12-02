@@ -60,25 +60,6 @@ pipeline {
             }
         }
 
-        // Dejar esto comentado por ahora; lo activamos al final del proyecto
-        // stage('Terraform Apply (dev)') {
-        //     when {
-        //         beforeAgent true
-        //         expression { return env.BRANCH_NAME == 'develop' }
-        //     }
-        //     steps {
-        //         input message: '¿Aplicar cambios en infraestructura dev?'
-        //         withCredentials([[
-        //             $class: 'AmazonWebServicesCredentialsBinding',
-        //             credentialsId: 'aws-terraform'
-        //         ]]) {
-        //             sh '''
-        //               echo "==== Ejecutando Terraform apply para entorno dev ===="
-        //               ci/terraform-plan.sh dev apply
-        //             '''
-        //         }
-        //     }
-        // }
     }
 
     post {
